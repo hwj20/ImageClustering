@@ -1,4 +1,4 @@
 import UIFrame
+import ImageUtils
 
-
-UIFrame
+ImageUtils.deal_image("test/test3.jpeg", 50)
