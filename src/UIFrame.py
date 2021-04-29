@@ -18,6 +18,8 @@ def mode_select():
             messagebox.showerror('错误', '无效的steps')
         if ret is ReturnCode.NO_SUCH_FILE:
             messagebox.showerror('错误', '未找到文件')
+        if ret is ReturnCode.INVALID_DOTS:
+            messagebox.showerror('错误', '错误的均值点个数')
     # if cmb.get() == '图片文件多选':
     #     path.set(askdirectory(title="选择地址"))
     #     deal_multi_image(path.get(), 50)

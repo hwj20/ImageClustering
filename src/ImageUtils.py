@@ -9,6 +9,7 @@ class ReturnCode(Enum):
     SUC = 0
     NO_SUCH_FILE = -1
     INVALID_STEPS = 1
+    INVALID_DOTS = 2
 
 
 def deal_multi_image(dir_path: str, step: int):
@@ -33,7 +34,8 @@ def deal_image(file_path: str, step: int, dots: int, to_show: bool, to_save: boo
         dy = int(img.shape[1] / step)
         if dx == 0 or dy == 0 or step <= 0:
             return ReturnCode.INVALID_STEPS
-
+        if dots == 0 or dots >= img.shape[0]*img.shape[1]:
+            return ReturnCode.INVALID_DOTS
         features = []
         for x in range(step):
             for y in range(step):
