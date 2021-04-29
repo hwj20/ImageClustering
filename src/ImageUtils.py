@@ -2,6 +2,13 @@ import numpy as np
 import matplotlib.pylab as plt
 import skimage.io as io
 import Kmeans
+from enum import Enum
+
+
+class ReturnCode(Enum):
+    SUC = 0
+    NO_SUCH_FILE = -1
+    INVALID_STEPS = 1
 
 
 def deal_multi_image(dir_path: str, step: int):
@@ -13,17 +20,20 @@ def deal_multi_image(dir_path: str, step: int):
         if len(coll) != 0:
             deal_image(filepath, step, False, True)
             print(len(coll))
-    return 1
+    return ReturnCode.SUC
 
 
-def deal_image(file_path: str, step: int, to_show: bool, to_save: bool):
+def deal_image(file_path: str, step: int, to_show: bool, to_save: bool, dist_fun_str: str):
     coll = io.ImageCollection(file_path)
     if len(coll) == 0:
-        return
+        return ReturnCode.NO_SUCH_FILE
     for index in range(len(coll)):
         img = np.array(coll[index])
         dx = int(img.shape[0] / step)
         dy = int(img.shape[1] / step)
+        if dx == 0 or dy == 0 or step <= 0:
+            return ReturnCode.INVALID_STEPS
+
         features = []
         for x in range(step):
             for y in range(step):
@@ -33,6 +43,7 @@ def deal_image(file_path: str, step: int, to_show: bool, to_save: bool):
                 features.append([Y, U, V])
         # i = img.reshape(img.shape[0] * img.shape[1], 3)
         i = features
+        dist_fun = str == Kmeans.ecludDist if dist_fun_str == 'ecludDist' else Kmeans.manhattanDist
         (index_in_center, center) = Kmeans.kMeans(i, Kmeans.ecludDist, Kmeans.randCenter(i, 3), 3)
         res = []
         for j in index_in_center:
@@ -44,17 +55,19 @@ def deal_image(file_path: str, step: int, to_show: bool, to_save: bool):
                 for y in range(dy):
                     ni[int(n / step) * dx + x, n % step * dy + y] = [x / 255 for x in res[n]]
         print(res)
+
         if to_show:
             plt.imshow(ni)
             plt.axis('off')
             plt.show()
         if to_save:
             plt.imshow(ni)
-            new_name = file_path.split('.')
-            new_name[0] = new_name[0] + str(index) + '-' + str(step) + '.'
-            new_name = "".join(new_name)
             plt.axis('off')
+            new_name = file_path.split('.')
+            new_name[0] = new_name[0] + '-' + str(index) + '-' + str(step) + '.'
+            new_name = "".join(new_name)
             plt.savefig(new_name)
+    return ReturnCode.SUC
 
 
 def deal_images(dir_path: str):
@@ -64,6 +77,12 @@ def deal_images(dir_path: str):
         filepath = dir_path + extension
         coll = io.ImageCollection(filepath)
         if len(coll) != 0:
-            arr = np.array(coll)
-            arr.reshape(arr.shape[0], arr.shape[1]*arr.shape[2])
-    return
+            arr = np.empty((0, 3))
+            for img in coll:
+                img_array = np.array(img)
+                img_array = img_array.reshape(img_array.shape[0] * img_array.shape[1], 3)
+                arr = np.concatenate((arr, img_array), axis=0)
+            #  必须要降维 不然要卡死，而且这图片要统一大小
+            # TODO
+            Kmeans.kMeans(arr, Kmeans.ecludDist, Kmeans.randCenter(arr, 3), 3)
+    return ReturnCode.SUC
