@@ -13,7 +13,7 @@ def mode_select():
     if cmb.get() == '图片文件':
         path.set(askopenfilename(
             filetypes=[('JPEG', '*.jpeg'), ('JPG', '*.jpg'), ('BMP', '*.bmp'), ('PNG', '*.png'), ('ALL FILES', '*')]))
-        ret = deal_image(path.get(), int(steps.get()), True, check.get() == 1, 'ecludDist' if cmb.get() == '欧拉距离' else 'manhattanDist')
+        ret = deal_image(path.get(), int(steps.get()), int(dots.get()), True, check.get() == 1, 'ecludDist' if cmb.get() == '欧拉距离' else 'manhattanDist')
         if ret is ReturnCode.INVALID_STEPS:
             messagebox.showerror('错误', '无效的steps')
         if ret is ReturnCode.NO_SUCH_FILE:
@@ -29,6 +29,7 @@ top.title('ImageClustering')
 path = tk.StringVar()
 check = tk.IntVar()
 steps = tk.StringVar()
+dots = tk.StringVar()
 
 tk.Label(top, text="目标路径/文件").grid(row=0, column=0)
 tk.Entry(top, textvariable=path).grid(row=0, column=1)
@@ -48,5 +49,9 @@ cmb2 = tk.ttk.Combobox(top)
 cmb2.grid(row=2, column=3)
 cmb2['value'] = ('欧拉距离', '曼哈顿距离')
 cmb2.current(0)
+
+tk.Label(top, text='均值点个数').grid(row=3, column=0)
+tk.Entry(top, textvariable=dots).grid(row=3, column=1)
+dots.set('3')
 
 top = tk.mainloop()

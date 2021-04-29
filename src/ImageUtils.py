@@ -23,7 +23,7 @@ def deal_multi_image(dir_path: str, step: int):
     return ReturnCode.SUC
 
 
-def deal_image(file_path: str, step: int, to_show: bool, to_save: bool, dist_fun_str: str):
+def deal_image(file_path: str, step: int, dots: int, to_show: bool, to_save: bool, dist_fun_str: str):
     coll = io.ImageCollection(file_path)
     if len(coll) == 0:
         return ReturnCode.NO_SUCH_FILE
@@ -44,7 +44,7 @@ def deal_image(file_path: str, step: int, to_show: bool, to_save: bool, dist_fun
         # i = img.reshape(img.shape[0] * img.shape[1], 3)
         i = features
         dist_fun = str == Kmeans.ecludDist if dist_fun_str == 'ecludDist' else Kmeans.manhattanDist
-        (index_in_center, center) = Kmeans.kMeans(i, Kmeans.ecludDist, Kmeans.randCenter(i, 3), 3)
+        (index_in_center, center) = Kmeans.kMeans(i, Kmeans.ecludDist, Kmeans.randCenter(i, dots), dots)
         res = []
         for j in index_in_center:
             res.append(center[j])
