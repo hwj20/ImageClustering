@@ -9,10 +9,10 @@ from tkinter import ttk
 def mode_select():
     if cmb.get() == '图片集':
         path.set(askdirectory())
-        deal_images(path.get())
+        deal_images(path.get(), check.get() == 1)
     if cmb.get() == '图片文件':
         path.set(askopenfilename(
-            filetypes=[('JPEG', '*.jpeg'), ('JPG', '*.jpg'), ('BMP', '*.bmp'), ('PNG', '*.png'), ('ALL FILES', '*')]))
+            filetypes=[('JPEG', '*.jpeg'), ('JPG', '*.jpg'), ('BMP', '*.bmp'),  ('ALL FILES', '*')]))
         ret = deal_image(path.get(), int(steps.get()), int(dots.get()), True, check.get() == 1, 'ecludDist' if cmb.get() == '欧拉距离' else 'manhattanDist')
         if ret is ReturnCode.INVALID_STEPS:
             messagebox.showerror('错误', '无效的steps')

@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import matplotlib.pylab as plt
 import skimage.io as io
 import Kmeans
@@ -46,7 +47,7 @@ def deal_image(file_path: str, step: int, dots: int, to_show: bool, to_save: boo
         # i = img.reshape(img.shape[0] * img.shape[1], 3)
         i = features
         dist_fun = str == Kmeans.ecludDist if dist_fun_str == 'ecludDist' else Kmeans.manhattanDist
-        (index_in_center, center) = Kmeans.kMeans(i, Kmeans.ecludDist, Kmeans.randCenter(i, dots), dots)
+        (index_in_center, center) = Kmeans.kMeans(i, dist_fun, Kmeans.randCenter(i, dots), dots)
         res = []
         for j in index_in_center:
             res.append(center[j])
@@ -72,19 +73,37 @@ def deal_image(file_path: str, step: int, dots: int, to_show: bool, to_save: boo
     return ReturnCode.SUC
 
 
-def deal_images(dir_path: str):
+def deal_images(dir_path: str, save: bool):
     extension_list = ['/*.jpeg', '/*.jpg', "/*.png", "/*.bmp"]
     filepath = dir_path
     for extension in extension_list:
         filepath = dir_path + extension
         coll = io.ImageCollection(filepath)
         if len(coll) != 0:
-            arr = np.empty((0, 3))
+            img_array = np.array(coll[0])
+            arr = np.empty((0, img_array.shape[0]*img_array.shape[1],
+                            1 if len(img_array.shape) != 3 else img_array.shape[2]))
             for img in coll:
                 img_array = np.array(img)
-                img_array = img_array.reshape(img_array.shape[0] * img_array.shape[1], 3)
-                arr = np.concatenate((arr, img_array), axis=0)
-            #  必须要降维 不然要卡死，而且这图片要统一大小
-            # TODO
-            Kmeans.kMeans(arr, Kmeans.ecludDist, Kmeans.randCenter(arr, 3), 3)
+                img_array = img_array.reshape(img_array.shape[0] * img_array.shape[1]
+                                              , 1 if len(img_array.shape) != 3 else img_array.shape[2])
+                arr = np.concatenate((arr, [img_array]), axis=0)
+            (index_in_center, center) = Kmeans.kMeans(arr, Kmeans.ecludDist, Kmeans.randCenter(arr, 3), 3)
+            for i in range(center.shape[0]):
+                s_dir = dir_path+'/imageClass'+str(i)
+                if not os.path.exists(s_dir):
+                    os.makedirs(s_dir)
+                if save:
+                    img_form = np.array(coll[0]).shape
+                    plt.imshow(np.array(center[i]).reshape(img_form[0], img_form[1],
+                                                           img_form[2] if len(img_form) == 3 else 1))
+                    plt.axis('off')
+                    # plt.show()
+                    plt.savefig(s_dir+'/imageOfClass'+str(i)+'.'+extension.split('.')[1])
+            for i in range(len(coll)):
+                s_dir = dir_path+'/imageClass'+str(index_in_center[i])+'/'+str(i)+'.'+extension.split('.')[1]
+                plt.imshow(coll[i])
+                plt.axis('off')
+                plt.savefig(s_dir)
+
     return ReturnCode.SUC
