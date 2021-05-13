@@ -89,11 +89,6 @@ def kMeans(dataset, dist, center, k):
     center_ = np.array([clusterMean(i) for i in all_kinds])
     if (center_ == center).all():
         print('结束')
-        # for i in range(k):
-        #     print('第' + str(i) + '组均值点：', center_[i], end='\n')
-        #     plt.scatter([j[0] for j in all_kinds[i]], [j[1] for j in all_kinds[i]], marker='*')
-        # plt.grid()
-        # plt.show()
         return index_list, center_
     else:
         # 递归调用kMeans函数

@@ -9,7 +9,7 @@ from tkinter import ttk
 def mode_select():
     if cmb.get() == '图片集':
         path.set(askdirectory())
-        deal_images(path.get(), check.get() == 1)
+        deal_images(path.get(), check.get() == 1, 'ecludDist' if cmb.get() == '欧拉距离' else 'manhattanDist')
     if cmb.get() == '图片文件':
         path.set(askopenfilename(
             filetypes=[('JPEG', '*.jpeg'), ('JPG', '*.jpg'), ('BMP', '*.bmp'),  ('ALL FILES', '*')]))

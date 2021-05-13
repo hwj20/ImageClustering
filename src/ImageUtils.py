@@ -73,7 +73,7 @@ def deal_image(file_path: str, step: int, dots: int, to_show: bool, to_save: boo
     return ReturnCode.SUC
 
 
-def deal_images(dir_path: str, save: bool):
+def deal_images(dir_path: str, save: bool, dist_fun_str: str):
     extension_list = ['/*.jpeg', '/*.jpg', "/*.png", "/*.bmp"]
     filepath = dir_path
     for extension in extension_list:
@@ -88,7 +88,8 @@ def deal_images(dir_path: str, save: bool):
                 img_array = img_array.reshape(img_array.shape[0] * img_array.shape[1]
                                               , 1 if len(img_array.shape) != 3 else img_array.shape[2])
                 arr = np.concatenate((arr, [img_array]), axis=0)
-            (index_in_center, center) = Kmeans.kMeans(arr, Kmeans.ecludDist, Kmeans.randCenter(arr, 3), 3)
+            dist_fun = str == Kmeans.ecludDist if dist_fun_str == 'ecludDist' else Kmeans.manhattanDist
+            (index_in_center, center) = Kmeans.kMeans(arr, dist_fun, Kmeans.randCenter(arr, 3), 3)
             for i in range(center.shape[0]):
                 s_dir = dir_path+'/imageClass'+str(i)
                 if not os.path.exists(s_dir):
