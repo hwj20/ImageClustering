@@ -57,7 +57,6 @@ def deal_image(file_path: str, step: int, dots: int, to_show: bool, to_save: boo
             for x in range(dx):
                 for y in range(dy):
                     ni[int(n / step) * dx + x, n % step * dy + y] = [x / 255 for x in res[n]]
-        print(res)
 
         if to_show:
             plt.imshow(ni)
