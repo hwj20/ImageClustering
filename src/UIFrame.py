@@ -9,11 +9,13 @@ from tkinter import ttk
 def mode_select():
     if cmb.get() == '图片集':
         path.set(askdirectory())
-        deal_images(path.get(), check.get() == 1, 'ecludDist' if cmb.get() == '欧拉距离' else 'manhattanDist')
+        deal_images(path.get(), check.get() == 1, 'ecludDist' if cmb.get() == '欧拉距离' else 'manhattanDist',
+                    cmb3.get() == '随机取值', int(dots.get()))
     if cmb.get() == '图片文件':
         path.set(askopenfilename(
-            filetypes=[('JPEG', '*.jpeg'), ('JPG', '*.jpg'), ('BMP', '*.bmp'),  ('ALL FILES', '*')]))
-        ret = deal_image(path.get(), int(steps.get()), int(dots.get()), True, check.get() == 1, 'ecludDist' if cmb.get() == '欧拉距离' else 'manhattanDist')
+            filetypes=[('JPEG', '*.jpeg'), ('JPG', '*.jpg'), ('BMP', '*.bmp'), ('ALL FILES', '*')]))
+        ret = deal_image(path.get(), int(steps.get()), int(dots.get()), True, check.get() == 1,
+                         'ecludDist' if cmb.get() == '欧拉距离' else 'manhattanDist', cmb3.get() == '随机取值')
         if ret is ReturnCode.INVALID_STEPS:
             messagebox.showerror('错误', '无效的steps')
         if ret is ReturnCode.NO_SUCH_FILE:
@@ -55,5 +57,10 @@ cmb2.current(0)
 tk.Label(top, text='均值点个数').grid(row=3, column=0)
 tk.Entry(top, textvariable=dots).grid(row=3, column=1)
 dots.set('3')
+tk.Label(top, text='初始值选择').grid(row=3, column=2)
+cmb3 = tk.ttk.Combobox(top)
+cmb3.grid(row=3, column=3)
+cmb3['value'] = ('随机取值', '顺序取值')
+cmb3.current(0)
 
 top = tk.mainloop()

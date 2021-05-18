@@ -94,3 +94,26 @@ def kMeans(dataset, dist, center, k):
         # 递归调用kMeans函数
         center = center_
         return kMeans(dataset, dist, center, k)
+
+
+def mul_kMeans(dataset, dist, k, times):
+    index_list, center_all = kMeans(dataset, dist, randCenter(dataset, k), k)
+    for i in range(times-1):
+        index_list, center = kMeans(dataset, dist, randCenter(dataset, k), k)
+        center_all = center_all + center
+    center_all = center_all / times
+
+    all_kinds = []
+    for _ in range(k):
+        temp = []
+        all_kinds.append(temp)
+    index_list = []
+    for i in dataset:
+        temp = []
+        for j in center_all:
+            temp.append(dist(i,j))
+        all_kinds[temp.index(min(temp))].append(i)  # temp.index(min(temp)) is the min value's index in center
+        index_list.append(temp.index((min(temp))))
+
+    return index_list, center_all
+

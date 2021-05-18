@@ -25,7 +25,7 @@ def deal_multi_image(dir_path: str, step: int):
     return ReturnCode.SUC
 
 
-def deal_image(file_path: str, step: int, dots: int, to_show: bool, to_save: bool, dist_fun_str: str):
+def deal_image(file_path: str, step: int, dots: int, to_show: bool, to_save: bool, dist_fun_str: str, random: bool):
     coll = io.ImageCollection(file_path)
     if len(coll) == 0:
         return ReturnCode.NO_SUCH_FILE
@@ -35,7 +35,7 @@ def deal_image(file_path: str, step: int, dots: int, to_show: bool, to_save: boo
         dy = int(img.shape[1] / step)
         if dx == 0 or dy == 0 or step <= 0:
             return ReturnCode.INVALID_STEPS
-        if dots == 0 or dots >= img.shape[0]*img.shape[1]:
+        if dots == 0 or dots >= img.shape[0] * img.shape[1]:
             return ReturnCode.INVALID_DOTS
         features = []
         for x in range(step):
@@ -47,7 +47,9 @@ def deal_image(file_path: str, step: int, dots: int, to_show: bool, to_save: boo
         # i = img.reshape(img.shape[0] * img.shape[1], 3)
         i = features
         dist_fun = str == Kmeans.ecludDist if dist_fun_str == 'ecludDist' else Kmeans.manhattanDist
-        (index_in_center, center) = Kmeans.kMeans(i, dist_fun, Kmeans.randCenter(i, dots), dots)
+        (index_in_center, center) = Kmeans.kMeans(i, dist_fun,
+                                                  Kmeans.randCenter(i, dots) if random else Kmeans.randCenter(i, dots),
+                                                  dots)
         res = []
         for j in index_in_center:
             res.append(center[j])
@@ -72,15 +74,16 @@ def deal_image(file_path: str, step: int, dots: int, to_show: bool, to_save: boo
     return ReturnCode.SUC
 
 
-def deal_images(dir_path: str, save: bool, dist_fun_str: str):
+def deal_images(dir_path: str, save: bool, dist_fun_str: str, random: bool, dots: int):
     extension_list = ['/*.jpeg', '/*.jpg', "/*.png", "/*.bmp"]
+    k = dots
     filepath = dir_path
     for extension in extension_list:
         filepath = dir_path + extension
         coll = io.ImageCollection(filepath)
         if len(coll) != 0:
             img_array = np.array(coll[0])
-            arr = np.empty((0, img_array.shape[0]*img_array.shape[1],
+            arr = np.empty((0, img_array.shape[0] * img_array.shape[1],
                             1 if len(img_array.shape) != 3 else img_array.shape[2]))
             for img in coll:
                 img_array = np.array(img)
@@ -88,9 +91,12 @@ def deal_images(dir_path: str, save: bool, dist_fun_str: str):
                                               , 1 if len(img_array.shape) != 3 else img_array.shape[2])
                 arr = np.concatenate((arr, [img_array]), axis=0)
             dist_fun = str == Kmeans.ecludDist if dist_fun_str == 'ecludDist' else Kmeans.manhattanDist
-            (index_in_center, center) = Kmeans.kMeans(arr, dist_fun, Kmeans.randCenter(arr, 3), 3)
+            (index_in_center, center) = Kmeans.kMeans(arr, dist_fun,
+                                                      Kmeans.orderCenter(arr, k) if not random else Kmeans.randCenter(
+                                                          arr, k), k)
+            # (index_in_center, center) = Kmeans.mul_kMeans(arr, dist_fun, 3, 10)
             for i in range(center.shape[0]):
-                s_dir = dir_path+'/imageClass'+str(i)
+                s_dir = dir_path + '/imageClass' + str(i)
                 if not os.path.exists(s_dir):
                     os.makedirs(s_dir)
                 if save:
@@ -99,9 +105,10 @@ def deal_images(dir_path: str, save: bool, dist_fun_str: str):
                                                            img_form[2] if len(img_form) == 3 else 1))
                     plt.axis('off')
                     # plt.show()
-                    plt.savefig(s_dir+'/imageOfClass'+str(i)+'.'+extension.split('.')[1])
+                    plt.savefig(s_dir + '/imageOfClass' + str(i) + '.' + extension.split('.')[1])
             for i in range(len(coll)):
-                s_dir = dir_path+'/imageClass'+str(index_in_center[i])+'/'+str(i)+'.'+extension.split('.')[1]
+                s_dir = dir_path + '/imageClass' + str(index_in_center[i]) + '/' + str(i) + '.' + extension.split('.')[
+                    1]
                 plt.imshow(coll[i])
                 plt.axis('off')
                 plt.savefig(s_dir)
